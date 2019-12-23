@@ -1,5 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import FormContainer from "./components/FormContainer";
+import { Provider } from "mobx-react";
 
-ReactDOM.render(<FormContainer />, document.getElementById('root')); 
+import store from "./store/index";
+import App from "./components/App";
+
+ReactDOM.render(
+    <Provider {...store}>
+        <App />
+    </Provider>, 
+    document.getElementById('root')
+); 
