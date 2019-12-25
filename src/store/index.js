@@ -1,11 +1,23 @@
-import PokemonStore from "./pokemonStore";
+import { observable, decorate, runInAction } from "mobx";
 
-class Store {
-    constructor() {
-        this.PokemonStore = new PokemonStore(this);
+class PokemonStore {
+    pokemons = {};
+
+    loadPokemons = (limit) => {
+        fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`)
+        .then(response => response.json())
+        .then(data => {
+            runInAction(() => {
+                this.pokemons = data;
+            });
+        });
     }
 }
 
-const rootStore = new Store();
+decorate(PokemonStore, {
+    pokemons: observable
+})
 
-export default rootStore;
+const pokemonStore = new PokemonStore();
+
+export default pokemonStore;
