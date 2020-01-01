@@ -1,22 +1,42 @@
-import { observable, decorate, runInAction } from "mobx";
+import { observable, decorate, runInAction, computed } from "mobx";
 
 class PokemonStore {
-    pokemons = {};
+    numberOfPokemon = 10;
+    pokemonsData = []; // for storing fetched data
+    filterValue = "";
+    filteredPokemons = [];
 
-    loadPokemons = (limit) => {
-        fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`)
-        .then(response => response.json())
-        .then(data => {
+    loadPokemons = () => {
+        const promises = [];
+        for (let pokemon = 1; pokemon <= this.numberOfPokemon; pokemon++) {
+            const url = `https://pokeapi.co/api/v2/pokemon/${pokemon}`;
+            promises.push(fetch(url).then(res => res.json()));
+        }
+
+        Promise.all(promises).then((results) => {
+            const pokemons = results.map((result) => {
+                return {
+                    abilities: result.abilities,
+                    id: result.id,
+                    name: result.name,
+                    sprites: result.sprites,
+                    stats: result.stats,
+                    types: result.types
+                };
+            });
             runInAction(() => {
-                this.pokemons = data;
+                this.filteredPokemons = pokemons;
+                this.pokemonsData = results;
             });
         });
     }
 }
 
 decorate(PokemonStore, {
-    pokemons: observable
-})
+    filteredPokemons: observable.ref,
+    filterValue: observable,
+    numberOfPokemon: observable
+});
 
 const pokemonStore = new PokemonStore();
 
